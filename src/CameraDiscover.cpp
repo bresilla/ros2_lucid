@@ -94,8 +94,8 @@ void CameraInfo::update_camera_discovered() {
             camera_device.presistentip = deviceInfo.IsPersistentIpConfigurationEnabled();
             camera_device.lla = deviceInfo.IsLLAConfigurationEnabled();
             uint64_t hex_mac = convert_mac(deviceInfo.MacAddressStr().c_str());
-            if (camset::by_mac.find(hex_mac) != camset::by_mac.end()) {
-                camera_device.name = camset::by_mac.at(hex_mac).name;
+            if (camera::by_mac().find(hex_mac) != camera::by_mac().end()) {
+                camera_device.name = camera::by_mac().at(hex_mac).name;
             }
             camera_array.cameras.push_back(camera_device);
         }

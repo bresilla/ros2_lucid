@@ -210,9 +210,9 @@ void CameraNode::load_camera_settings() {
     GenApi::CFloatPtr framerate = pDevice->GetNodeMap()->GetNode("AcquisitionFrameRate");
     framerate->SetValue(framerate->GetMax());
     GenApi::CIntegerPtr pStreamChannelPacketDelay = pDevice->GetNodeMap()->GetNode("GevSCPD");
-    pStreamChannelPacketDelay->SetValue(camset::by_mac.at(mac).scpd);
+    pStreamChannelPacketDelay->SetValue(camera::by_mac().at(mac).scpd);
     GenApi::CIntegerPtr pStreamChannelFrameTransmissionDelay = pDevice->GetNodeMap()->GetNode("GevSCFTD");
-    pStreamChannelFrameTransmissionDelay->SetValue(camset::by_mac.at(mac).scftd);
+    pStreamChannelFrameTransmissionDelay->SetValue(camera::by_mac().at(mac).scftd);
 }
 
 void CameraNode::load_settings_from_func() {
@@ -341,7 +341,7 @@ int main_unmanaged(int argc, char **argv) {
         for (auto& deviceInfo : deviceInfos){
 			Arena::IDevice* pDevice;
             uint64_t mac = convert_mac(deviceInfo.MacAddressStr().c_str());
-            if (camset::by_mac.find(mac) != camset::by_mac.end()) {
+            if (camera::by_mac().find(mac) != camera::by_mac().end()) {
                 vDevices.push_back(std::make_pair(pDevice, mac));
             }
 		}
@@ -360,7 +360,7 @@ int main_unmanaged(int argc, char **argv) {
 
     std::vector<std::shared_ptr<CameraNode>> camera_nodes;
     for (auto& pDevice : vDevices) {
-        std::string camera_name = camset::by_mac.at(pDevice.second).name;
+        std::string camera_name = camera::by_mac().at(pDevice.second).name;
         auto camera_node = std::make_shared<CameraNode>(pSystem, camera_name, pDevice.second);
         // camera_node->add_system(pSystem);
         // camera_node->add_device(pDevice.first);
@@ -399,7 +399,7 @@ int main_managed(int argc, char **argv) {
     std::vector<std::shared_ptr<CameraNode>> camera_nodes;
     try {
         pSystem = Arena::OpenSystem();
-        for (auto& cam : camset::by_mac) {
+        for (auto& cam : camera::by_mac()) {
             camera_nodes.push_back(std::make_shared<CameraNode>(pSystem, cam.second.name, cam.first, false));
             executor.add_node(camera_nodes.back()->get_node_base_interface());
         }
@@ -431,7 +431,7 @@ int named_camera(int argc, char **argv, std::string camera_name) {
     rclcpp::executors::SingleThreadedExecutor executor;
     try {
         pSystem = Arena::OpenSystem();
-        auto camera_node = std::make_shared<CameraNode>(pSystem, camera_name, camset::by_name.at(camera_name));
+        auto camera_node = std::make_shared<CameraNode>(pSystem, camera_name, camera::by_name().at(camera_name));
         executor.add_node(camera_node->get_node_base_interface());
         executor.spin();
     } catch(const std::exception& e) {
@@ -445,11 +445,11 @@ int named_camera(int argc, char **argv, std::string camera_name) {
     return 0;
 }
 
-int named_camera2(int argc, char **argv, std::string camera_name) {
-    fmt::print("... LAUNCHING CAMERA {} ...\n", camera_name);
-    camset::cam_list_anv();
-    fmt::print("......\n");
-}
+// int named_camera2(int argc, char **argv, std::string camera_name) {
+//     fmt::print("... LAUNCHING CAMERA {} ...\n", camera_name);
+//     camera::map_by_mac()();
+//     fmt::print("......\n");
+// }
 
 
 
@@ -476,7 +476,7 @@ int main(int argc, char **argv) {
         } else if (managed_str == "false") {
             return main_unmanaged(argc, argv);
         } else if (managed_str != "") {
-            return named_camera2(argc, argv, managed_str);
+            return named_camera(argc, argv, managed_str);
         } else {
             std::cerr << "Invalid argument for managed flag\nuse --managed true|false or --managed <cam_name>" << std::endl;
             return 0;

@@ -28,7 +28,7 @@ CameraManager::CameraManager() : Node("camera_manager") {
     camera_get = this->create_client<ros2_lucid::srv::AskCamera>("cam_discovered");
 
 
-    for (auto& cam : camset::by_mac) {
+    for (auto& cam : camera::by_mac()) {
         RCLCPP_INFO(this->get_logger(), "Camera %s with mac %lu", cam.second.name.c_str(), cam.first);
         auto cam_topic_name = "camera_" + cam.second.name;
         camera_get_state[cam_topic_name] = this->create_client<lifecycle_msgs::srv::GetState>(cam_topic_name + "/get_state");
