@@ -45,7 +45,7 @@ find_package(OpenCV REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-# find_package(nlohmann_json REQUIRED)
+find_package(fmt REQUIRED)
 
 set(ros_dependencies
   rclcpp
@@ -64,6 +64,7 @@ set(ros_dependencies
   ${image_transport_LIBRARIES}
   nlohmann_json::nlohmann_json
   rerun_sdk
+  fmt::fmt
 )
 
 
