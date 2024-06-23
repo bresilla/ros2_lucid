@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.14)
 project(ros2_lucid)
+include(FetchContent)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -18,10 +19,13 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
-# include(FetchContent)
-# FetchContent_Declare(rerun_sdk URL
-#     https://github.com/rerun-io/rerun/releases/latest/download/rerun_cpp_sdk.zip)
-# FetchContent_MakeAvailable(rerun_sdk)
+FetchContent_Declare(rerun_sdk URL
+    https://github.com/rerun-io/rerun/releases/latest/download/rerun_cpp_sdk.zip)
+FetchContent_MakeAvailable(rerun_sdk)
+
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
 
 include_directories(
   include
@@ -40,8 +44,8 @@ find_package(arena_sdk REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
-find_package(fmt REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+# find_package(nlohmann_json REQUIRED)
 
 set(ros_dependencies
   rclcpp
@@ -51,10 +55,15 @@ set(ros_dependencies
   rclcpp_lifecycle
   sensor_msgs
   cv_bridge
-  image_transport
   arena_sdk
-  OpenCV
-  fmt
+)
+  
+  set(other_dependencies
+  ${OpenCV_LIBS}
+  ${cv_bridge_LIBRARIES}
+  ${image_transport_LIBRARIES}
+  nlohmann_json::nlohmann_json
+  rerun_sdk
 )
 
 
@@ -71,14 +80,17 @@ rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typ
 add_executable(camera_discover src/CameraDiscover.cpp)
 ament_target_dependencies(camera_discover ${ros_dependencies})
 target_link_libraries(camera_discover "${cpp_typesupport_target}")
+target_link_libraries(camera_discover ${other_dependencies})
 
 add_executable(camera_node src/CameraNode.cpp)
 ament_target_dependencies(camera_node ${ros_dependencies})
 target_link_libraries(camera_node "${cpp_typesupport_target}")
+target_link_libraries(camera_node ${other_dependencies})
 
 add_executable(camera_manager src/CameraManager.cpp)
 ament_target_dependencies(camera_manager ${ros_dependencies})
 target_link_libraries(camera_manager "${cpp_typesupport_target}")
+target_link_libraries(camera_manager ${other_dependencies})
 
 
 install(TARGETS
