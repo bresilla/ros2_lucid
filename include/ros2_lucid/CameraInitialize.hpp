@@ -81,22 +81,8 @@ namespace camset {
         std::ifstream ifs(path);
         json j = json::parse(ifs);
 
-        // std::vector<std::pair<std::string, int8_t>> groups;
-
-        // for (auto& cam : j.at("cams").items()) {
-        //     auto iface = cam.value().at("iface").get<std::string>();
-        //     if (std::find_if(groups.begin(), groups.end(), [&iface](const std::pair<std::string, int8_t>& p) { return p.first == iface; }) == groups.end()) {
-        //         groups.push_back({iface, 1});
-        //     } else {
-        //         auto it = std::find_if(groups.begin(), groups.end(), [&iface](const std::pair<std::string, int8_t>& p) { return p.first == iface; });
-        //         it->second++;
-        //     }
-        // }
-
         std::map<std::string, int8_t> new_group;
         for (auto& cam : j.at("cams").items()){
-            //ig goups[i].first not in new_group add it
-            //else increment the value
             auto iface = cam.value().at("iface").get<std::string>();
             if (new_group.find(iface) == new_group.end()) {
                 new_group[iface] = 1;
@@ -104,17 +90,16 @@ namespace camset {
                 new_group[iface]++;
             }
         }
-
+        std::map<std::string, int8_t> cloned_group = new_group;
         for (auto& cam : j.at("cams").items()) {
             auto name = cam.value().at("name").get<std::string>();
             auto mac = cam.key();
             auto iface = cam.value().at("iface").get<std::string>();
-            // auto group = std::find_if(groups.begin(), groups.end(), [&iface](const std::pair<std::string, int8_t>& p) { return p.first == iface; })->second;
-            auto group = new_group[iface];
-            auto scpd = (group - 1) * 80000;
-            auto scftd = scpd * 1.2;
+            auto scpd = (new_group[iface] - 1) * 80000;
+            cloned_group[iface]--;
+            auto scftd = (cloned_group[iface]) * 80000;
 
-            fmt::print("iface: {}, mac: {}, name: {}, group: {}, scpd: {}\n", iface, mac, name, group, scpd);
+            fmt::print("iface: {}, mac: {}, name: {}, group: {}, scpd: {}, scftd: {}\n", iface, mac, name, new_group[iface], scpd, scftd);
         }
 
 
