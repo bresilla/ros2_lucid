@@ -10,35 +10,35 @@ def generate_launch_description():
     ld = LaunchDescription()
 
     camera_info = Node(
-        package='genicam',
-        executable='camera_info',
+        package='ros2_lucid',
+        executable='camera_discover',
         output="screen",
         emulate_tty=True,
     )
     ld.add_action(camera_info)
 
 
-    # camera_node = Node(
-    #     package='genicam',
-    #     executable='camera_node',
-    #     output="screen",
-    #     emulate_tty=True,
-    #     arguments=['--managed', 'true'],
-    # )
-    # ld.add_action(camera_node)
+    camera_node = Node(
+        package='ros2_lucid',
+        executable='camera_node',
+        output="screen",
+        emulate_tty=True,
+        arguments=['--managed', 'true'],
+    )
+    ld.add_action(camera_node)
 
-    for camera in cameras:
-        camera_node = Node(
-            package='genicam',
-            executable='camera_node',
-            output="screen",
-            emulate_tty=True,
-            arguments=['--managed', camera],
-        )
-        ld.add_action(camera_node)
+    # for camera in cameras:
+    #     camera_node = Node(
+    #         package='ros2_lucid',
+    #         executable='camera_node',
+    #         output="screen",
+    #         emulate_tty=True,
+    #         arguments=['--managed', camera],
+    #     )
+    #     ld.add_action(camera_node)
 
     camera_manager = Node(
-        package='genicam',
+        package='ros2_lucid',
         executable='camera_manager',
         output="screen",
         emulate_tty=True,

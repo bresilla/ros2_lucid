@@ -445,14 +445,6 @@ int named_camera(int argc, char **argv, std::string camera_name) {
     return 0;
 }
 
-// int named_camera2(int argc, char **argv, std::string camera_name) {
-//     fmt::print("... LAUNCHING CAMERA {} ...\n", camera_name);
-//     camera::map_by_mac()();
-//     fmt::print("......\n");
-// }
-
-
-
 std::string parse_arguments(int argc, char * argv[], std::string custom_arg){
     auto return_string = "";
     for (int i = 1; i < argc; ++i){

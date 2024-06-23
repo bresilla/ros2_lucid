@@ -36,7 +36,7 @@ namespace camera {
         std::map<std::string, int8_t> cloned_group = new_group;
         for (auto& cam : j.at("cameras").items()) {
             auto name = cam.value().at("name").get<std::string>();
-            auto mac = atoi(cam.key().c_str());
+            auto mac = static_cast<uint64_t>(std::stoull(cam.key()));
             auto iface = cam.value().at("iface").get<std::string>();
             auto scpd = (new_group[iface] - 1) * 80000;
             cloned_group[iface]--;
@@ -55,7 +55,9 @@ namespace camera {
 
         for (auto& cam : j.at("cameras").items()){
             auto name = cam.value().at("name").get<std::string>();
-            auto mac = atoi(cam.key().c_str());
+            auto mac = static_cast<uint64_t>(std::stoull(cam.key()));
+            // fmt::print("Camera name: {}, MAC: {}\n", name, mac);
+            // fmt::print("Camera name: {}, MAC: {}\n", name, mac);
             res[name] = mac;
         }
         return res;
