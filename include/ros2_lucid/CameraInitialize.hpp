@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
+#include <fmt/format.h>
+
 #include <fstream>
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
@@ -62,15 +64,61 @@ namespace camset {
     };
 
 
-    inline std::map<uint64_t, std::string> get_from_json() {
-        std::string path = ament_index_cpp::get_package_share_directory("ros2_lucid") + "/config/camera.json";
+    inline std::map<uint64_t, std::string> cam_list() {
+        std::string path = ament_index_cpp::get_package_share_directory("ros2_lucid") + "/config/cameras.json";
         std::ifstream ifs(path);
         json j = json::parse(ifs);
         std::map<uint64_t, std::string> res;
-        for (auto& [mac, name] : j.items()) {
-
-        //     res[std::stoull(mac)] = name;
+        // fmt::print("{}", j.at("cameras").dump());
+        for (auto& [key, value] : j.at("cameras").items()) {
+            res[atoi(key.c_str())] = value;
         }
+        return res;
+    }
+    
+    inline std::map<uint64_t, Data> cam_list_anv() {
+        std::string path = ament_index_cpp::get_package_share_directory("ros2_lucid") + "/config/cameras.json";
+        std::ifstream ifs(path);
+        json j = json::parse(ifs);
+
+        // std::vector<std::pair<std::string, int8_t>> groups;
+
+        // for (auto& cam : j.at("cams").items()) {
+        //     auto iface = cam.value().at("iface").get<std::string>();
+        //     if (std::find_if(groups.begin(), groups.end(), [&iface](const std::pair<std::string, int8_t>& p) { return p.first == iface; }) == groups.end()) {
+        //         groups.push_back({iface, 1});
+        //     } else {
+        //         auto it = std::find_if(groups.begin(), groups.end(), [&iface](const std::pair<std::string, int8_t>& p) { return p.first == iface; });
+        //         it->second++;
+        //     }
+        // }
+
+        std::map<std::string, int8_t> new_group;
+        for (auto& cam : j.at("cams").items()){
+            //ig goups[i].first not in new_group add it
+            //else increment the value
+            auto iface = cam.value().at("iface").get<std::string>();
+            if (new_group.find(iface) == new_group.end()) {
+                new_group[iface] = 1;
+            } else {
+                new_group[iface]++;
+            }
+        }
+
+        for (auto& cam : j.at("cams").items()) {
+            auto name = cam.value().at("name").get<std::string>();
+            auto mac = cam.key();
+            auto iface = cam.value().at("iface").get<std::string>();
+            // auto group = std::find_if(groups.begin(), groups.end(), [&iface](const std::pair<std::string, int8_t>& p) { return p.first == iface; })->second;
+            auto group = new_group[iface];
+            auto scpd = (group - 1) * 80000;
+            auto scftd = scpd * 1.2;
+
+            fmt::print("iface: {}, mac: {}, name: {}, group: {}, scpd: {}\n", iface, mac, name, group, scpd);
+        }
+
+
+        std::map<uint64_t, Data> res;
         return res;
     }
 }

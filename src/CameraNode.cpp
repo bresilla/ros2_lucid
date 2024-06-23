@@ -7,6 +7,8 @@
 #include <opencv2/opencv.hpp>
 #include <std_msgs/msg/int16.hpp>
 
+#include <fmt/format.h>
+
 #include <ros2_lucid/CameraNode.hpp>
 #include <ros2_lucid/CameraInitialize.hpp>
 #include <ros2_lucid/srv/trigger_camera.hpp>
@@ -443,6 +445,12 @@ int named_camera(int argc, char **argv, std::string camera_name) {
     return 0;
 }
 
+int named_camera2(int argc, char **argv, std::string camera_name) {
+    fmt::print("... LAUNCHING CAMERA {} ...\n", camera_name);
+    camset::cam_list_anv();
+    fmt::print("......\n");
+}
+
 
 
 std::string parse_arguments(int argc, char * argv[], std::string custom_arg){
@@ -468,7 +476,7 @@ int main(int argc, char **argv) {
         } else if (managed_str == "false") {
             return main_unmanaged(argc, argv);
         } else if (managed_str != "") {
-            return named_camera(argc, argv, managed_str);
+            return named_camera2(argc, argv, managed_str);
         } else {
             std::cerr << "Invalid argument for managed flag\nuse --managed true|false or --managed <cam_name>" << std::endl;
             return 0;
